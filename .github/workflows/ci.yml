@@ -1,0 +1,19 @@
+name: ci
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["site/**"] # apply commits only touch site/
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Berlin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: bmmmm/putzii
+          ref: ${{ vars.PUTZII_REF }}
+          path: putzii-app
+      - run: node runner/test.mjs putzii-app
