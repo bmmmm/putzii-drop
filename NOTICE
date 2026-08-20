@@ -1,0 +1,8 @@
+putzii-drop is GPL-3.0-or-later (see LICENSE).
+
+Vendored third-party code:
+
+- internal/qr/ (incl. internal/qr/reedsolomon/): QR encoder core from
+  https://github.com/piglig/go-qr (a Go port of Nayuki's QR-Code-generator),
+  MIT License — see internal/qr/LICENSE. Modifications: package renamed to
+  `qr`, import paths rewritten for vendoring, decoder/renderer files omitted.

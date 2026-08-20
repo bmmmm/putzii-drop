@@ -8,3 +8,7 @@ dropii
 # local build artifacts
 *.test
 dist/
+
+# generated parity fixtures (CI regenerates them)
+internal/dropcrypto/testdata/
+internal/wire/testdata/

@@ -37,8 +37,15 @@ Single remote `origin` = GitHub. Decided with the user 2026-08-20.
     realm. loadapp.mjs therefore passes Node's `Date` constructor INTO the
     sandbox — do not remove it.
   - 2026 has 53 ISO weeks (starts on a Thursday) — "2026-W53" is valid.
-- V5 Pages caching: fastly edge, `cache-control: max-age=600` confirmed on
-  headers; query-bust measurement → see README/findings below once final.
+- **V5 Pages caching**: fastly edge, `cache-control: max-age=600` on the
+  headers — but a deploy PURGES the edge (plain GET fresh seconds after
+  deploy despite 9 min residual TTL), entries live only ~seconds–minutes
+  per cache node, and **query-param cache-busting is INEFFECTIVE** (unique
+  `?b=` still answered `x-cache: HIT` from the same object — the query
+  string is not part of the cache key). Consequences: no immutable
+  rev-paths needed, the app's read path uses `cache:"no-store"` (browser
+  cache only) and NO bust param; worst-case staleness is minutes, the
+  "3 stale pulls in a row → hint" logic covers it.
 - V2/V6 PAT grant probes: pending — fine-grained PAT creation is UI-only
   (the one manual setup step, done by the user in dropii setup).
 
