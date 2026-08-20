@@ -43,6 +43,8 @@ func main() {
 		err = cmdRotate(args)
 	case "compact":
 		err = cmdCompact(args)
+	case "link":
+		err = cmdLink(args)
 	case "qr":
 		err = cmdQr(args)
 	case "button":
@@ -75,6 +77,8 @@ usage: dropii <command> [flags]
   pin       --ref <sha|branch> — bump the pinned putzii commit (gated on selfcheck)
   rotate    pat | key | token — credential rotation
   compact   --keep-days N — drop old events + squash ciphertext history
+  link      checkin --user <id> --areas <id|name,...> — pre-scoped confirm
+            link for Signal (person + activities fixed, no read access)
   qr        print/export QR codes (--areas | --user | --sheet)
   button    new --kind curl|ha|shortcut|http — check-in button snippets
   config    path | edit | template
