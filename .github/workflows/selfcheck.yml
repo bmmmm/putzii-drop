@@ -1,5 +1,7 @@
 # Daily gate that CAN go red: full runner suite incl. the TZ pin check and
-# the no-plaintext-in-log gates, against the PINNED putzii ref.
+# the no-plaintext-in-log gates, against the PINNED putzii ref. `dropii pin`
+# gates on this run's conclusion — keep it pin-only; the putzii@main drift
+# alarm lives in driftcheck.yml.
 name: selfcheck
 on:
   schedule:

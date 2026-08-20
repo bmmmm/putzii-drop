@@ -50,6 +50,18 @@ function fatal(reason) {
   return { code: 2, reason, log: [`fatal reason=${reason}`] };
 }
 
+// The wire envelope is append-only: a newer putzii may add slots this pinned
+// checkout does not know. Re-encoding would silently STRIP them, so any
+// envelope longer than what the pinned app itself emits is refused (fatal,
+// nothing written). Fix = `dropii pin --ref <newer putzii sha>`.
+function knownWireSlots(PZ) {
+  return PZ.share.wireFromPlan(
+    { planId: "x", name: "", updatedAt: 0, areas: [], people: [], events: [], weeks: [] },
+    0,
+    false,
+  ).length;
+}
+
 function defaultHealth() {
   return { rev: 0, at: "", lastRunId: "", tail: [] };
 }
@@ -79,6 +91,7 @@ export async function applyDispatch(input, deps) {
   log.push(`auth=ok person=${input.personId} mode=${mode} clientRev=${Number(input.clientRev) || 0}`);
 
   // ---- (2) load + decrypt current state ----
+  const wireSlots = knownWireSlots(PZ);
   const planPath = path.join(siteDir, "plans", `${input.planId}.json`);
   let basePlan = null;
   let baseRev = 0;
@@ -97,6 +110,12 @@ export async function applyDispatch(input, deps) {
       wire = JSON.parse(
         Buffer.from(gunzipSync(plainBytes, { maxOutputLength: CAPS.gunzipBytes })).toString("utf8"),
       );
+    } catch (e) {
+      return fatal("state-decode");
+    }
+    // state written by a newer runner, then the pin rolled back — refuse
+    if (Array.isArray(wire) && wire.length > wireSlots) return fatal("state-unknown-slots");
+    try {
       basePlan = PZ.share.planFromWire(wire).plan;
     } catch (e) {
       return fatal("state-decode");
@@ -154,7 +173,10 @@ export async function applyDispatch(input, deps) {
     try {
       const gz = b64urlDecode(payload);
       const json = Buffer.from(gunzipSync(gz, { maxOutputLength: CAPS.gunzipBytes })).toString("utf8");
-      decoded = PZ.share.planFromWire(JSON.parse(json));
+      const arr = JSON.parse(json);
+      // client app is newer than the pin — fail loud, never strip its slots
+      if (Array.isArray(arr) && arr.length > wireSlots) return fatal("wire-unknown-slots");
+      decoded = PZ.share.planFromWire(arr);
     } catch (e) {
       return fatal("wire");
     }

@@ -219,6 +219,24 @@ async function run(siteDir, input, nowMs) {
   const junk = await run(site, { mode: "envelope", payload: "not-base64-gzip!!", nonce: "jjjj2222" });
   check("apply-wire-junk", junk.code === 2 && junk.reason === "wire");
 
+  // envelope from a NEWER app (appended slot 10): refuse, never strip
+  const futureWire = PZ.share.wireFromPlan(mkPlan(), 1, false);
+  futureWire.push(["future-slot-data"]);
+  const futurePayload = Buffer.from(gzipSync(Buffer.from(JSON.stringify(futureWire), "utf8"))).toString("base64url");
+  const future = await run(site, { mode: "envelope", payload: futurePayload, nonce: "slotw2222" });
+  check("apply-wire-unknown-slots", future.code === 2 && future.reason === "wire-unknown-slots", future.reason);
+
+  // stored state from a newer runner (pin rolled back): refuse before re-encode
+  const siteFuture = freshSite();
+  const futurePlain = new Uint8Array(gzipSync(Buffer.from(JSON.stringify(futureWire), "utf8")));
+  const futureEnc = await encryptState(key, "AbC123xy", futurePlain);
+  fs.writeFileSync(
+    path.join(siteFuture, "plans", "AbC123xy.json"),
+    serializeStateFile(7, new Date(NOW).toISOString(), futureEnc.iv, futureEnc.ct),
+  );
+  const staleBase = await run(siteFuture, { mode: "checkin", payload: "kche1", nonce: "slots2222" });
+  check("apply-state-unknown-slots", staleBase.code === 2 && staleBase.reason === "state-unknown-slots", staleBase.reason);
+
   // no-plan checkin
   const site2 = freshSite();
   const noplan = await run(site2, { mode: "checkin", payload: "kche1", nonce: "kkkk2222" });

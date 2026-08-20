@@ -61,7 +61,11 @@ Single remote `origin` = GitHub. Decided with the user 2026-08-20.
 2. The merge is `mergePlans` from putzii, loaded verbatim via loadapp.mjs
    from a second checkout pinned to a COMMIT SHA (`vars.PUTZII_REF`). Bump
    only via `dropii pin` after a green parity test. Divergence is always
-   fixed in the app, never in the runner.
+   fixed in the app, never in the runner. A stale pin FAILS LOUD: envelopes
+   (or stored state) with more wire slots than the pinned app emits →
+   fatal `wire-unknown-slots`/`state-unknown-slots`, never a lossy strip.
+   Drift alarm = daily `driftcheck.yml` against putzii@main — kept as a
+   SEPARATE workflow because `dropii pin` gates on selfcheck's conclusion.
 3. State file `site/plans/<planId>.json`: AES-256-GCM, fresh 12-byte IV per
    write, AAD = planId+"|1". `rev`/`at` stay plaintext (freshness check
    without decrypt). Plaintext = gzip(UNCAPPED wire envelope) → always runs
@@ -87,7 +91,7 @@ site/                 Pages publish root (keep small — on the deploy path)
   health.json         PLAINTEXT {rev, at, lastRunId, tail:[…50]}
   plans/<planId>.json encrypted state
 runner/               apply.mjs loadapp.mjs crypto.mjs mint.mjs test.mjs
-.github/workflows/    apply.yml pages.yml selfcheck.yml ci.yml
+.github/workflows/    apply.yml pages.yml selfcheck.yml driftcheck.yml ci.yml
 cmd/dropii/ internal/ Go CLI (phase 2)
 ```
 

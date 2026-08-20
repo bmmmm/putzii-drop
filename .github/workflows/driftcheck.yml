@@ -1,0 +1,23 @@
+# Drift alarm: the full runner suite against putzii@MAIN. Red here means
+# putzii moved past PUTZII_REF incompatibly — run `dropii pin --ref <sha>`
+# before any household hits it. Deliberately a SEPARATE workflow from
+# selfcheck: `dropii pin` gates on selfcheck's run conclusion, and a red
+# main-compat check must never block pinning to a compatible ref.
+name: driftcheck
+on:
+  schedule:
+    - cron: "37 3 * * *"
+  workflow_dispatch:
+jobs:
+  main-compat:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Berlin
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: bmmmm/putzii
+          ref: main
+          path: putzii-app
+      - run: node runner/test.mjs putzii-app
