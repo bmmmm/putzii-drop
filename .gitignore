@@ -3,7 +3,8 @@ putzii-app/
 
 # dropii CLI: real config holds key + PAT — NEVER commit it
 dropii.conf
-dropii
+# the built binary (anchored: a bare "dropii" would also ignore cmd/dropii/)
+/dropii
 
 # local build artifacts
 *.test
