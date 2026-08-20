@@ -46,8 +46,12 @@ Single remote `origin` = GitHub. Decided with the user 2026-08-20.
   rev-paths needed, the app's read path uses `cache:"no-store"` (browser
   cache only) and NO bust param; worst-case staleness is minutes, the
   "3 stale pulls in a row → hint" logic covers it.
-- V2/V6 PAT grant probes: pending — fine-grained PAT creation is UI-only
-  (the one manual setup step, done by the user in dropii setup).
+- V2/V6 PAT grant probes: MEASURED 2026-08-20 on the prod repo — dispatch
+  probe with missing required inputs → 422 (proves Actions:write without
+  starting a run), contents write → 403, secrets read → 403. PAT creation
+  stays UI-only (the one manual setup step). The created PAT carries a
+  1-year expiry (2027-08-17); doctor warns below 30 days. Prod selftest:
+  apply confirmed 13 s, visible on pages 33 s.
 
 ## Invariants — do not break
 

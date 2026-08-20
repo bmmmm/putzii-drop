@@ -3,6 +3,10 @@ putzii-app/
 
 # dropii CLI: real config holds key + PAT — NEVER commit it
 dropii.conf
+# generated QR artifacts: putzii-zugang-*.png embeds FULL credentials
+putzii-zugang-*.png
+putzii-checkin-*.png
+putzii-qr-sheet.html
 # the built binary (anchored: a bare "dropii" would also ignore cmd/dropii/)
 /dropii
 
